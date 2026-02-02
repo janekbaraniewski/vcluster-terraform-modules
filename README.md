@@ -1,37 +1,57 @@
-# vcluster-terraform-modules
+# vCluster Terraform Modules
 
-This repository contains ready to use Terraform modules that will make working with vCluster easier.
+Production-ready Terraform modules for deploying and managing vClusters — standalone (OSS) or with vCluster Platform integration.
 
-## Available modules
+## Modules
 
-- [single-namespace-rename](single-namespace-rename/README.md)
+| Module | Description |
+|--------|-------------|
+| [vcluster](vcluster/) | Complete vCluster deployment: namespace, Helm install, kubeconfig. Optional platform registration for Pro features. |
+| [vcluster-kubeconfig](vcluster-kubeconfig/) | Fetch and write a vCluster kubeconfig from the Platform API |
+| [vcluster-platform-registration](vcluster-platform-registration/) | Register an external vCluster with vCluster Platform for Pro features |
+| [single-namespace-rename](single-namespace-rename/) | Translate vCluster resource names for single-namespace mode |
 
-## How to use
+## Usage
 
-You can import given module into your terraform using git:
+### With vCluster Platform
 
 ```hcl
-provider "http" {
-    alias = "default"
+module "my_vcluster" {
+  source = "git::https://github.com/loft-sh/vcluster-terraform-modules.git//vcluster"
+
+  name                = "my-vcluster"
+  project_name        = "default"
+  platform_url        = "https://my-platform.loft.host"
+  platform_access_key = var.platform_access_key
+
+  helm_values = [file("${path.module}/vcluster-values.yaml")]
 }
 
-module "my_k8s_resource" {
-  source        = "github.com/loft-sh/vcluster-terraform-modules//single-namespace-rename"
-
-  providers = {
-    http.default = http.default
-  }
-
-
-  host                = var.vcluster_platform_host
-  access_key          = var.access_key
-  resource_name       = var.service_account_name
-  resource_namespace  = var.service_account_namespace
-  vcluster_name       = var.vcluster_name
-}
-
-
-output "updated_name" {
-  value = module.my_k8s_resource.name
+# Configure a provider using the vCluster credentials
+provider "kubernetes" {
+  alias                  = "vcluster"
+  host                   = module.my_vcluster.host
+  cluster_ca_certificate = module.my_vcluster.cluster_ca_certificate
+  client_certificate     = module.my_vcluster.client_certificate
+  client_key             = module.my_vcluster.client_key
 }
 ```
+
+### Standalone (OSS)
+
+Deploy a vCluster without platform registration. The kubeconfig is read from a Kubernetes secret created by vCluster's `exportKubeConfig` Helm values feature.
+
+```hcl
+module "my_vcluster" {
+  source = "git::https://github.com/loft-sh/vcluster-terraform-modules.git//vcluster"
+
+  name        = "my-vcluster"
+  helm_values = [file("${path.module}/vcluster-values.yaml")]
+}
+```
+
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 1.6 |

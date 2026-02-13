@@ -8,7 +8,7 @@ provider "http" {
 
 module "my_k8s_resource" {
   count  = length(local.test_cases)
-  source = "../single-namespace-rename"
+  source = "../"
 
   providers = {
     http.default = http.default

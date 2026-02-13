@@ -4,9 +4,9 @@ variable "host" {
 }
 
 variable "insecure" {
-    description = "Disables verification of the server's certificate chain and hostname."
-    type        = bool
-    default     = false
+  description = "Disables verification of the server's certificate chain and hostname."
+  type        = bool
+  default     = false
 }
 
 variable "access_key" {

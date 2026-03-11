@@ -1,8 +1,14 @@
-locals {
-  project_namespace = "p-${var.project_name}"
-  host_with_scheme  = length(regexall("^(http|https)://", var.platform_url)) > 0 ? var.platform_url : "https://${var.platform_url}"
-  sanitized_host    = replace(local.host_with_scheme, "/\\/+$/", "")
-  platform_host     = replace(replace(local.sanitized_host, "https://", ""), "http://", "")
+module "ctx" {
+  source = "../_shared/platform-context"
+
+  vcluster_name       = var.vcluster_name
+  project_name        = var.project_name
+  platform_url        = var.platform_url
+  platform_access_key = var.platform_access_key
+  platform_insecure   = var.platform_insecure
+  retry_attempts      = var.retry_attempts
+  retry_min_delay_ms  = var.retry_min_delay_ms
+  retry_max_delay_ms  = var.retry_max_delay_ms
 }
 
 # =============================================================================
@@ -15,7 +21,7 @@ resource "kubernetes_manifest" "virtualclusterinstance" {
     kind       = "VirtualClusterInstance"
     metadata = {
       name      = var.vcluster_name
-      namespace = local.project_namespace
+      namespace = module.ctx.project_namespace
       labels = {
         "vcluster.loft.sh/created-by-cli" = "true"
         "app.kubernetes.io/managed-by"    = "terraform"
@@ -44,7 +50,7 @@ resource "kubernetes_manifest" "virtualclusterinstance" {
 # =============================================================================
 
 data "http" "access_key" {
-  url    = "${local.sanitized_host}/kubernetes/management/apis/management.loft.sh/v1/namespaces/${local.project_namespace}/virtualclusterinstances/${var.vcluster_name}/accesskey"
+  url    = "${module.ctx.sanitized_host}/kubernetes/management/apis/management.loft.sh/v1/namespaces/${module.ctx.project_namespace}/virtualclusterinstances/${var.vcluster_name}/accesskey"
   method = "GET"
 
   request_headers = {
@@ -95,7 +101,7 @@ resource "kubernetes_secret_v1" "platform_api_key" {
 
   data = {
     accessKey = local.access_key_response.accessKey
-    host      = local.platform_host
+    host      = module.ctx.platform_host
     project   = var.project_name
     insecure  = var.platform_insecure ? "true" : "false"
     name      = var.vcluster_name

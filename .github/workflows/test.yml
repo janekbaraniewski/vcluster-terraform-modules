@@ -1,11 +1,6 @@
-name: Terraform CI
+name: OpenTofu CI
 
 on:
-  push:
-    paths:
-      - '**/*.tf'
-      - '**/*.tftest.hcl'
-      - '.github/workflows/test.yml'
   pull_request:
     branches: [main]
     paths:
@@ -18,12 +13,12 @@ jobs:
     name: Format Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1.0.8
         with:
-          terraform_version: "1.14"
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive
+          tofu_version: "1.9"
+      - name: OpenTofu Format Check
+        run: tofu fmt -check -recursive
 
   validate:
     name: Validate
@@ -32,20 +27,21 @@ jobs:
       fail-fast: false
       matrix:
         directory:
+          - _shared/platform-context
           - vcluster
           - vcluster-kubeconfig
           - vcluster-platform-registration
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1.0.8
         with:
-          terraform_version: "1.14"
-      - name: Terraform Init
+          tofu_version: "1.9"
+      - name: OpenTofu Init
         working-directory: ${{ matrix.directory }}
-        run: terraform init -backend=false
-      - name: Terraform Validate
+        run: tofu init -backend=false
+      - name: OpenTofu Validate
         working-directory: ${{ matrix.directory }}
-        run: terraform validate
+        run: tofu validate
 
   test:
     name: Test
@@ -57,13 +53,13 @@ jobs:
           - vcluster
           - single-namespace-rename
     steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1.0.8
         with:
-          terraform_version: "1.14"
-      - name: Terraform Init
+          tofu_version: "1.9"
+      - name: OpenTofu Init
         working-directory: ${{ matrix.directory }}
-        run: terraform init -backend=false
-      - name: Terraform Test
+        run: tofu init -backend=false
+      - name: OpenTofu Test
         working-directory: ${{ matrix.directory }}
-        run: terraform test -no-color
+        run: tofu test -no-color

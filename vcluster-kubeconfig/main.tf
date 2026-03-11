@@ -1,9 +1,18 @@
+module "ctx" {
+  source = "../_shared/platform-context"
+
+  vcluster_name       = var.vcluster_name
+  project_name        = var.project_name
+  platform_url        = var.platform_url
+  platform_access_key = var.platform_access_key
+  platform_insecure   = var.platform_insecure
+  retry_attempts      = var.retry_attempts
+  retry_min_delay_ms  = var.retry_min_delay_ms
+  retry_max_delay_ms  = var.retry_max_delay_ms
+}
+
 locals {
-  project_namespace = "p-${var.project_name}"
-  host_with_scheme  = length(regexall("^(http|https)://", var.platform_url)) > 0 ? var.platform_url : "https://${var.platform_url}"
-  sanitized_host    = replace(local.host_with_scheme, "/\\/+$/", "")
-  platform_host     = replace(replace(local.sanitized_host, "https://", ""), "http://", "")
-  kubeconfig_path   = var.output_path != "" ? var.output_path : "${path.module}/${var.vcluster_name}-kubeconfig.yaml"
+  kubeconfig_path = var.output_path != "" ? var.output_path : "${path.module}/${var.vcluster_name}-kubeconfig.yaml"
 }
 
 # =============================================================================
@@ -11,7 +20,7 @@ locals {
 # =============================================================================
 
 data "http" "kubeconfig" {
-  url    = "${local.sanitized_host}/kubernetes/management/apis/management.loft.sh/v1/namespaces/${local.project_namespace}/virtualclusterinstances/${var.vcluster_name}/kubeconfig"
+  url    = "${module.ctx.sanitized_host}/kubernetes/management/apis/management.loft.sh/v1/namespaces/${module.ctx.project_namespace}/virtualclusterinstances/${var.vcluster_name}/kubeconfig"
   method = "POST"
 
   request_headers = {
@@ -26,7 +35,7 @@ data "http" "kubeconfig" {
       name = var.vcluster_name
     }
     spec = {
-      certificateTTL = 86400
+      certificateTTL = var.certificate_ttl
     }
   })
 
@@ -56,7 +65,7 @@ data "http" "kubeconfig" {
 
 locals {
   kubeconfig_raw     = jsondecode(data.http.kubeconfig.response_body).status.kubeConfig
-  kubeconfig_content = replace(local.kubeconfig_raw, "https://localhost:8080", "https://${local.platform_host}")
+  kubeconfig_content = replace(local.kubeconfig_raw, "https://localhost:8080", "https://${module.ctx.platform_host}")
   kubeconfig_yaml    = try(yamldecode(local.kubeconfig_content), null)
 }
 

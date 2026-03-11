@@ -6,12 +6,12 @@ output "access_key" {
 
 output "project_namespace" {
   description = "Platform project namespace (with 'p-' prefix)"
-  value       = local.project_namespace
+  value       = module.ctx.project_namespace
 }
 
 output "platform_host" {
   description = "Platform hostname (without scheme)"
-  value       = local.platform_host
+  value       = module.ctx.platform_host
 }
 
 output "platform_secret_name" {

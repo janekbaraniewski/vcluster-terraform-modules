@@ -4,8 +4,7 @@ mock_provider "http" {}
 mock_provider "local" {}
 
 override_data {
-  target          = data.kubernetes_secret_v1.vcluster_kubeconfig[0]
-  override_during = plan
+  target = data.kubernetes_secret_v1.vcluster_kubeconfig
 
   values = {
     data = {

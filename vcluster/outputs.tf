@@ -1,5 +1,5 @@
 locals {
-  oss_kubeconfig_content = (!var.skip_kubeconfig && !local.platform_enabled) ? nonsensitive(data.kubernetes_secret_v1.vcluster_kubeconfig[0].data["config"]) : ""
+  oss_kubeconfig_content = (!var.skip_kubeconfig && !local.platform_enabled) ? data.kubernetes_secret_v1.vcluster_kubeconfig[0].data["config"] : ""
 }
 
 output "name" {
@@ -56,7 +56,7 @@ output "kubeconfig_content" {
 output "host" {
   description = "Kubernetes API server URL from the kubeconfig. Use as 'host' in provider blocks."
   value = var.skip_kubeconfig ? "" : (
-    local.platform_enabled ? module.kubeconfig[0].host : try(yamldecode(local.oss_kubeconfig_content).clusters[0].cluster.server, "")
+    local.platform_enabled ? module.kubeconfig[0].host : try(nonsensitive(yamldecode(local.oss_kubeconfig_content).clusters[0].cluster.server), "")
   )
 }
 
@@ -95,6 +95,6 @@ output "token" {
 output "insecure_skip_tls_verify" {
   description = "Whether TLS verification is disabled in the kubeconfig"
   value = var.skip_kubeconfig ? false : (
-    local.platform_enabled ? module.kubeconfig[0].insecure_skip_tls_verify : try(yamldecode(local.oss_kubeconfig_content).clusters[0].cluster["insecure-skip-tls-verify"], false)
+    local.platform_enabled ? module.kubeconfig[0].insecure_skip_tls_verify : try(nonsensitive(yamldecode(local.oss_kubeconfig_content).clusters[0].cluster["insecure-skip-tls-verify"]), false)
   )
 }

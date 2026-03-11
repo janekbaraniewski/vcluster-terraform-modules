@@ -4,7 +4,7 @@ mock_provider "http" {}
 mock_provider "local" {}
 
 override_module {
-  target = module.platform_registration[0]
+  target = module.platform_registration
 
   outputs = {
     access_key           = "mock-access-key"
@@ -17,7 +17,7 @@ override_module {
 }
 
 override_module {
-  target = module.kubeconfig[0]
+  target = module.kubeconfig
 
   outputs = {
     kubeconfig_path          = "/tmp/test-cluster-kubeconfig.yaml"

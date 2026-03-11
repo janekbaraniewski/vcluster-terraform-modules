@@ -1,16 +1,6 @@
 variable "name" {
   description = "Name of the vCluster. Must be a valid Kubernetes resource name."
   type        = string
-
-  validation {
-    condition     = can(regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$", var.name))
-    error_message = "Must be a valid Kubernetes name: lowercase alphanumeric and hyphens, must start and end with alphanumeric."
-  }
-
-  validation {
-    condition     = length(var.name) >= 1 && length(var.name) <= 63
-    error_message = "Must be between 1 and 63 characters."
-  }
 }
 
 variable "project_name" {
@@ -18,11 +8,6 @@ variable "project_name" {
   type        = string
   default     = ""
   nullable    = false
-
-  validation {
-    condition     = var.project_name == "" || !startswith(var.project_name, "p-")
-    error_message = "Do not include the 'p-' prefix. The module adds it automatically."
-  }
 }
 
 variable "platform_url" {
@@ -30,11 +15,6 @@ variable "platform_url" {
   type        = string
   default     = ""
   nullable    = false
-
-  validation {
-    condition     = var.platform_url == "" || can(regex("^(https?://)?[a-zA-Z0-9][a-zA-Z0-9.-]+(:[0-9]+)?/?$", var.platform_url))
-    error_message = "Must be a valid URL or hostname (e.g., https://my-platform.loft.host or my-platform.loft.host). Paths are not allowed."
-  }
 }
 
 variable "platform_access_key" {
@@ -163,11 +143,6 @@ variable "retry_attempts" {
   type        = number
   default     = 5
   nullable    = false
-
-  validation {
-    condition     = var.retry_attempts >= 1
-    error_message = "Must be at least 1."
-  }
 }
 
 variable "retry_min_delay_ms" {
@@ -175,11 +150,6 @@ variable "retry_min_delay_ms" {
   type        = number
   default     = 5000
   nullable    = false
-
-  validation {
-    condition     = var.retry_min_delay_ms >= 0
-    error_message = "Must be non-negative."
-  }
 }
 
 variable "retry_max_delay_ms" {
@@ -187,9 +157,4 @@ variable "retry_max_delay_ms" {
   type        = number
   default     = 15000
   nullable    = false
-
-  validation {
-    condition     = var.retry_max_delay_ms >= 0
-    error_message = "Must be non-negative."
-  }
 }

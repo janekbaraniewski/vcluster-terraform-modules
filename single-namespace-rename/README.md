@@ -33,7 +33,10 @@ output "updated_name" {
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| terraform | >= 1.5 |
+| http | >= 3.2 |
 
 ## Providers
 

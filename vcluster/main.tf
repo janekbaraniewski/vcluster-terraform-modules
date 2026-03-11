@@ -1,14 +1,12 @@
 module "ctx" {
   source = "../_shared/platform-context"
 
-  vcluster_name       = var.name
-  project_name        = var.project_name
-  platform_url        = var.platform_url
-  platform_access_key = var.platform_access_key
-  platform_insecure   = var.platform_insecure
-  retry_attempts      = var.retry_attempts
-  retry_min_delay_ms  = var.retry_min_delay_ms
-  retry_max_delay_ms  = var.retry_max_delay_ms
+  vcluster_name      = var.name
+  project_name       = var.project_name
+  platform_url       = var.platform_url
+  retry_attempts     = var.retry_attempts
+  retry_min_delay_ms = var.retry_min_delay_ms
+  retry_max_delay_ms = var.retry_max_delay_ms
 }
 
 locals {
@@ -24,16 +22,6 @@ locals {
 
 resource "kubernetes_namespace_v1" "vcluster" {
   count = var.create_namespace ? 1 : 0
-
-  lifecycle {
-    precondition {
-      condition = (
-        (var.platform_url == "" && var.project_name == "" && var.platform_access_key == "") ||
-        (var.platform_url != "" && var.project_name != "" && var.platform_access_key != "")
-      )
-      error_message = "Platform variables must be all-or-nothing: provide all of platform_url, project_name, and platform_access_key, or none of them."
-    }
-  }
 
   metadata {
     name = local.namespace
@@ -76,6 +64,16 @@ module "platform_registration" {
 resource "helm_release" "vcluster" {
   depends_on = [module.platform_registration]
 
+  lifecycle {
+    precondition {
+      condition = (
+        (var.platform_url == "" && var.project_name == "" && var.platform_access_key == "") ||
+        (var.platform_url != "" && var.project_name != "" && var.platform_access_key != "")
+      )
+      error_message = "Platform variables must be all-or-nothing: provide all of platform_url, project_name, and platform_access_key, or none of them."
+    }
+  }
+
   name             = var.name
   namespace        = local.namespace
   create_namespace = false
@@ -116,6 +114,8 @@ module "kubeconfig" {
 # Fetch Kubeconfig — OSS mode (from Kubernetes secret)
 # =============================================================================
 
+# The vCluster Helm chart always creates a secret named "vc-<name>" containing
+# the kubeconfig. The depends_on ensures the Helm release completes first.
 data "kubernetes_secret_v1" "vcluster_kubeconfig" {
   count = (!var.skip_kubeconfig && !local.platform_enabled) ? 1 : 0
 

@@ -1,14 +1,12 @@
 module "ctx" {
   source = "../_shared/platform-context"
 
-  vcluster_name       = var.vcluster_name
-  project_name        = var.project_name
-  platform_url        = var.platform_url
-  platform_access_key = var.platform_access_key
-  platform_insecure   = var.platform_insecure
-  retry_attempts      = var.retry_attempts
-  retry_min_delay_ms  = var.retry_min_delay_ms
-  retry_max_delay_ms  = var.retry_max_delay_ms
+  vcluster_name      = var.vcluster_name
+  project_name       = var.project_name
+  platform_url       = var.platform_url
+  retry_attempts     = var.retry_attempts
+  retry_min_delay_ms = var.retry_min_delay_ms
+  retry_max_delay_ms = var.retry_max_delay_ms
 }
 
 locals {
@@ -64,7 +62,10 @@ data "http" "kubeconfig" {
 # =============================================================================
 
 locals {
-  kubeconfig_raw     = jsondecode(data.http.kubeconfig.response_body).status.kubeConfig
+  kubeconfig_raw = jsondecode(data.http.kubeconfig.response_body).status.kubeConfig
+  # The Platform API always returns https://localhost:8080 as the server address
+  # in generated kubeconfigs. Rewrite it to the actual platform host so the
+  # kubeconfig is usable outside the platform pod network.
   kubeconfig_content = replace(local.kubeconfig_raw, "https://localhost:8080", "https://${module.ctx.platform_host}")
   kubeconfig_yaml    = try(yamldecode(local.kubeconfig_content), null)
 }

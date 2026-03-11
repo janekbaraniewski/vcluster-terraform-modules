@@ -14,7 +14,7 @@
       "groupName": "github-actions"
     },
     {
-      "description": "Group Terraform provider updates into a single PR",
+      "description": "Group OpenTofu provider updates into a single PR",
       "matchManagers": ["terraform"],
       "matchDepTypes": ["provider"],
       "groupName": "terraform-providers"

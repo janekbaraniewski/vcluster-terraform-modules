@@ -1,6 +1,7 @@
 # Shared validation and normalization for platform-related variables.
 # Used by: vcluster, vcluster-kubeconfig, vcluster-platform-registration.
 
+# tflint-ignore: terraform_unused_declarations
 variable "vcluster_name" {
   description = "Name of the vCluster. Must be a valid Kubernetes resource name."
   type        = string
@@ -39,19 +40,7 @@ variable "platform_url" {
   }
 }
 
-variable "platform_access_key" {
-  description = "Access key for authenticating with the vCluster Platform API."
-  type        = string
-  default     = ""
-  sensitive   = true
-}
-
-variable "platform_insecure" {
-  description = "Whether to skip TLS verification for platform API calls. Only use for development."
-  type        = bool
-  default     = false
-}
-
+# tflint-ignore: terraform_unused_declarations
 variable "retry_attempts" {
   description = "Number of retry attempts for platform API calls."
   type        = number
@@ -74,6 +63,7 @@ variable "retry_min_delay_ms" {
   }
 }
 
+# tflint-ignore: terraform_unused_declarations
 variable "retry_max_delay_ms" {
   description = "Maximum delay in milliseconds between retry attempts."
   type        = number

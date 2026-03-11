@@ -8,6 +8,10 @@ Registers an external vCluster with the vCluster Platform, enabling Pro features
 2. Provisions platform credentials for the vCluster
 3. Stores the credentials as a Kubernetes secret in the vCluster namespace
 
+## Prerequisites
+
+The `VirtualClusterInstance` CRD (`management.loft.sh/v1`) must exist in the cluster before running `tofu plan`. This is a known limitation of the `kubernetes_manifest` resource, which requires CRDs to be present at plan time. The CRD is created automatically when vCluster Platform is installed.
+
 ## Usage
 
 ```hcl

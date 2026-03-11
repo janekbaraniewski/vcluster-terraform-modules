@@ -56,6 +56,7 @@ output "kubeconfig_content" {
 output "host" {
   description = "Kubernetes API server URL from the kubeconfig. Use as 'host' in provider blocks."
   value = var.skip_kubeconfig ? "" : (
+    # Server URL is not secret; unwrap because source is a sensitive data source
     local.platform_enabled ? module.kubeconfig[0].host : try(nonsensitive(yamldecode(local.oss_kubeconfig_content).clusters[0].cluster.server), "")
   )
 }
@@ -95,6 +96,7 @@ output "token" {
 output "insecure_skip_tls_verify" {
   description = "Whether TLS verification is disabled in the kubeconfig"
   value = var.skip_kubeconfig ? false : (
+    # TLS skip flag is not secret; unwrap because source is a sensitive data source
     local.platform_enabled ? module.kubeconfig[0].insecure_skip_tls_verify : try(nonsensitive(yamldecode(local.oss_kubeconfig_content).clusters[0].cluster["insecure-skip-tls-verify"]), false)
   )
 }

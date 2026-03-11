@@ -1,7 +1,10 @@
 terraform {
+  required_version = ">= 1.5"
+
   required_providers {
     http = {
-      source = "hashicorp/http"
+      source  = "hashicorp/http"
+      version = ">= 3.2"
       configuration_aliases = [
         http.default,
       ]
@@ -21,7 +24,7 @@ locals {
 data "http" "post_request" {
   provider = http.default
   url      = local.full_url
-  insecure = true
+  insecure = var.insecure
   request_headers = {
     "Content-Type"  = "application/json"
     "Authorization" = "Bearer ${var.access_key}"

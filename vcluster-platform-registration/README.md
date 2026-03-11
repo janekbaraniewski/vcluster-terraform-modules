@@ -22,33 +22,59 @@ module "vcluster_registration" {
 }
 ```
 
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
 | terraform | >= 1.6 |
-| kubernetes | >= 2.0 |
 | http | >= 3.2 |
+| kubernetes | >= 2.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| http | 3.5.0 |
+| kubernetes | 2.38.0 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| ctx | ../_shared/platform-context | n/a |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [kubernetes_manifest.virtualclusterinstance](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/manifest) | resource |
+| [kubernetes_secret_v1.platform_api_key](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
+| [http_http.access_key](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|----------|
-| vcluster_name | Name of the vCluster to register | `string` | | yes |
-| vcluster_namespace | Namespace where vCluster is deployed | `string` | | yes |
-| project_name | vCluster Platform project name (without 'p-' prefix) | `string` | | yes |
-| platform_url | URL of the vCluster Platform | `string` | | yes |
-| platform_access_key | Platform API access key | `string` | | yes |
-| vcluster_chart_version | vCluster Helm chart version | `string` | `null` (omitted) | no |
-| platform_insecure | Skip TLS verification | `bool` | `false` | no |
+|------|-------------|------|---------|:--------:|
+| platform\_access\_key | Access key for authenticating with the vCluster Platform API | `string` | n/a | yes |
+| platform\_url | URL of the vCluster Platform (e.g., https://my-platform.loft.host). Scheme is added automatically if omitted. | `string` | n/a | yes |
+| project\_name | vCluster Platform project name (without 'p-' prefix) | `string` | n/a | yes |
+| vcluster\_name | Name of the vCluster to register with the platform | `string` | n/a | yes |
+| vcluster\_namespace | Kubernetes namespace where the vCluster is deployed | `string` | n/a | yes |
+| platform\_insecure | Whether to skip TLS verification for platform API calls. Only use for development. | `bool` | `false` | no |
+| retry\_attempts | Number of retry attempts for the access key API call. | `number` | `5` | no |
+| retry\_max\_delay\_ms | Maximum delay in milliseconds between retry attempts. | `number` | `15000` | no |
+| retry\_min\_delay\_ms | Minimum delay in milliseconds between retry attempts. | `number` | `5000` | no |
+| vcluster\_chart\_version | vCluster Helm chart version to record in the platform registration. When null, the version field is omitted. | `string` | `null` | no |
 
 ## Outputs
 
-| Name | Description | Sensitive |
-|------|-------------|-----------|
-| access_key | Platform-issued access key for the vCluster | yes |
-| project_namespace | Platform project namespace (with 'p-' prefix) | no |
-| platform_host | Platform hostname (without scheme) | no |
-| platform_secret_name | Name of the created platform credentials secret | no |
-| vci_name | Name of the created VirtualClusterInstance | no |
-| completed | Readiness marker for depends_on | no |
+| Name | Description |
+|------|-------------|
+| access\_key | Platform-issued access key for the vCluster |
+| completed | Readiness marker. Use with depends\_on to sequence downstream resources. |
+| platform\_host | Platform hostname (without scheme) |
+| platform\_secret\_name | Name of the Kubernetes secret created for platform credentials |
+| project\_namespace | Platform project namespace (with 'p-' prefix) |
+| vci\_name | Name of the created VirtualClusterInstance resource |
+<!-- END_TF_DOCS -->

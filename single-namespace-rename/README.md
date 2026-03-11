@@ -2,24 +2,6 @@
 
 This module allows you to easily reference k8s resources that were synced back to host cluster by vcluster when using single namespace deployment mode.
 
-## Providers
-
-This module requires `http` provider to be passed to it.
-
-## Variables
-
-- `host` - vCluster Platform host.
-- `access_key` - Access key for vCluster Platform API.
-- `resource_name` - Name of k8s resource deployed within virtual cluster.
-- `resource_namespace` - Namespace of k8s resource within virtual cluster.
-- `vcluster_name` - Name of virtual cluster hosting the resource.
-
-## Outputs
-
-- `name` - Synced back k8s resource name.
-- `response_code` - Response status code.
-- `response_body` - Full json response body.
-
 ## Usage
 
 ```hcl
@@ -47,3 +29,44 @@ output "updated_name" {
   value = module.my_k8s_resource.name
 }
 ```
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| http.default | 3.5.0 |
+
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [http_http.post_request](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| access\_key | vCluster Platform access key to authenticate to API | `string` | n/a | yes |
+| host | The vCluster Platform host URL. | `string` | n/a | yes |
+| resource\_name | Value for spec.name in the JSON payload | `string` | n/a | yes |
+| resource\_namespace | Value for spec.namespace in the JSON payload | `string` | n/a | yes |
+| vcluster\_name | Value for spec.vclusterName in the JSON payload | `string` | n/a | yes |
+| insecure | Disables verification of the server's certificate chain and hostname. | `bool` | `false` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| name | The value of the 'name' key from the 'status' struct in the response of the POST request |
+| response\_body | The full JSON response body from the POST request |
+| response\_code | The HTTP response code from the POST request |
+<!-- END_TF_DOCS -->

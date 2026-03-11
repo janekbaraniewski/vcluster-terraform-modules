@@ -69,56 +69,80 @@ provider "kubernetes" {
 }
 ```
 
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
 | terraform | >= 1.6 |
-| kubernetes | >= 2.0 |
 | helm | >= 2.0 |
+| kubernetes | >= 2.0 |
 | local | >= 2.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| helm | 3.1.1 |
+| kubernetes | 3.0.1 |
+| local | 2.7.0 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| ctx | ../_shared/platform-context | n/a |
+| kubeconfig | ../vcluster-kubeconfig | n/a |
+| platform\_registration | ../vcluster-platform-registration | n/a |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [helm_release.vcluster](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [kubernetes_namespace_v1.vcluster](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace_v1) | resource |
+| [local_sensitive_file.kubeconfig](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/sensitive_file) | resource |
+| [kubernetes_secret_v1.vcluster_kubeconfig](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/data-sources/secret_v1) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|----------|
-| name | Name of the vCluster | `string` | | yes |
-| project_name | vCluster Platform project name (without 'p-' prefix) | `string` | `""` | no |
-| platform_url | URL of the vCluster Platform. Leave empty for OSS mode. | `string` | `""` | no |
-| platform_access_key | Platform API access key | `string` | `""` | no |
-| namespace | Namespace for vCluster (defaults to `<name>-ns`) | `string` | `""` | no |
-| create_namespace | Create the namespace | `bool` | `true` | no |
-| namespace_labels | Additional namespace labels | `map(string)` | `{}` | no |
-| platform_insecure | Skip TLS verification for platform calls | `bool` | `false` | no |
-| chart_version | vCluster Helm chart version | `string` | `null` (latest) | no |
-| helm_repository | Helm repository URL | `string` | `"https://charts.loft.sh"` | no |
-| helm_chart | Helm chart name | `string` | `"vcluster"` | no |
-| helm_values | List of Helm values content (YAML strings) | `list(string)` | `[]` | no |
-| helm_timeout | Helm timeout in seconds | `number` | `600` | no |
-| kubeconfig_output_path | Path for kubeconfig file | `string` | `""` | no |
-| kubeconfig_secret_name | Name of the K8s secret with kubeconfig (OSS mode, defaults to `vc-<name>`) | `string` | `""` | no |
-| skip_kubeconfig | Skip fetching kubeconfig (outputs return empty values) | `bool` | `false` | no |
+|------|-------------|------|---------|:--------:|
+| name | Name of the vCluster. Must be a valid Kubernetes resource name. | `string` | n/a | yes |
+| chart\_version | vCluster Helm chart version to deploy. When null, the latest version from the Helm repository is used. | `string` | `null` | no |
+| create\_namespace | Whether to create the Kubernetes namespace. Set to false if the namespace already exists. | `bool` | `true` | no |
+| helm\_chart | Helm chart name to deploy | `string` | `"vcluster"` | no |
+| helm\_repository | Helm repository URL for the vCluster chart | `string` | `"https://charts.loft.sh"` | no |
+| helm\_timeout | Helm install/upgrade timeout in seconds | `number` | `600` | no |
+| helm\_values | List of Helm values as YAML strings. Each entry is passed as a separate -f/--values argument. | `list(string)` | `[]` | no |
+| kubeconfig\_output\_path | Filesystem path where the kubeconfig will be written. Defaults to <name>-kubeconfig.yaml in the root module directory. | `string` | `""` | no |
+| kubeconfig\_secret\_name | Name of the Kubernetes secret containing the vCluster kubeconfig (OSS mode). Defaults to 'vc-<name>' if empty. | `string` | `""` | no |
+| namespace | Kubernetes namespace for the vCluster. Defaults to <name>-ns when empty. | `string` | `""` | no |
+| namespace\_labels | Additional labels to apply to the namespace. Merged with default labels (app.kubernetes.io/managed-by, app.kubernetes.io/name). | `map(string)` | `{}` | no |
+| platform\_access\_key | Access key for authenticating with the vCluster Platform API. Required when platform\_url is set. | `string` | `""` | no |
+| platform\_insecure | Whether to skip TLS verification for platform API calls. Only use for development. | `bool` | `false` | no |
+| platform\_url | URL of the vCluster Platform (e.g., https://my-platform.loft.host). Leave empty for standalone (OSS) mode. | `string` | `""` | no |
+| project\_name | vCluster Platform project name (without 'p-' prefix). Required when platform\_url is set. | `string` | `""` | no |
+| retry\_attempts | Number of retry attempts for platform API calls (kubeconfig fetch, access key fetch). Increase if vClusters take longer to become available. | `number` | `5` | no |
+| retry\_max\_delay\_ms | Maximum delay in milliseconds between retry attempts for platform API calls. | `number` | `15000` | no |
+| retry\_min\_delay\_ms | Minimum delay in milliseconds between retry attempts for platform API calls. | `number` | `5000` | no |
+| skip\_kubeconfig | Skip fetching kubeconfig entirely. When true, all kubeconfig-related outputs return empty values. | `bool` | `false` | no |
 
 ## Outputs
 
-| Name | Description | Sensitive |
-|------|-------------|-----------|
-| name | Name of the vCluster | no |
-| namespace | Namespace where vCluster is deployed | no |
-| project_namespace | Platform project namespace (with 'p-' prefix). Empty in OSS mode. | no |
-| access_key | Platform-issued access key. Empty in OSS mode. | yes |
-| ready | Readiness marker for depends_on | no |
-| kubeconfig_path | Filesystem path to the kubeconfig file | no |
-| kubeconfig_content | Raw kubeconfig YAML content | yes |
-| host | Kubernetes API server URL (for provider `host` argument) | no |
-| cluster_ca_certificate | PEM-encoded cluster CA certificate | yes |
-| client_certificate | PEM-encoded client certificate | yes |
-| client_key | PEM-encoded client key | yes |
-| token | Bearer token for API authentication | yes |
-| insecure_skip_tls_verify | Whether TLS verification is disabled | no |
-
-## Submodules
-
-This module uses:
-- [vcluster-platform-registration](../vcluster-platform-registration/) - Platform registration (when `platform_url` is set)
-- [vcluster-kubeconfig](../vcluster-kubeconfig/) - Kubeconfig fetching from Platform API (when `platform_url` is set)
+| Name | Description |
+|------|-------------|
+| access\_key | Platform-issued access key for the vCluster. Empty when platform is not used. |
+| client\_certificate | PEM-encoded client certificate (base64-decoded) |
+| client\_key | PEM-encoded client key (base64-decoded) |
+| cluster\_ca\_certificate | PEM-encoded cluster CA certificate (base64-decoded) |
+| host | Kubernetes API server URL from the kubeconfig. Use as 'host' in provider blocks. |
+| insecure\_skip\_tls\_verify | Whether TLS verification is disabled in the kubeconfig |
+| kubeconfig\_content | Raw kubeconfig YAML content |
+| kubeconfig\_path | Filesystem path to the written kubeconfig file |
+| name | Name of the vCluster |
+| namespace | Kubernetes namespace where the vCluster is deployed |
+| project\_namespace | Platform project namespace (with 'p-' prefix). Empty when platform is not used. |
+| ready | Readiness marker. Use with depends\_on to sequence downstream resources. |
+| token | Bearer token for Kubernetes API authentication |
+<!-- END_TF_DOCS -->

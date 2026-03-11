@@ -51,6 +51,8 @@ jobs:
       matrix:
         directory:
           - vcluster
+          - vcluster-kubeconfig
+          - vcluster-platform-registration
           - single-namespace-rename
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1

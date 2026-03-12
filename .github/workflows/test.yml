@@ -42,6 +42,25 @@ jobs:
           output-method: inject
           fail-on-diff: true
 
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        directory:
+          - _shared/platform-context
+          - vcluster
+          - vcluster-kubeconfig
+          - vcluster-platform-registration
+          - single-namespace-rename
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: bridgecrewio/checkov-action@f9b0a2206b0401cad02ac0a66be2a7934a5be838 # v12
+        with:
+          directory: ${{ matrix.directory }}
+          framework: terraform
+
   lint:
     name: Lint
     runs-on: ubuntu-latest

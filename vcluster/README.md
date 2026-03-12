@@ -83,9 +83,9 @@ provider "kubernetes" {
 
 | Name | Version |
 |------|---------|
-| helm | 3.1.1 |
-| kubernetes | 3.0.1 |
-| local | 2.7.0 |
+| helm | >= 2.0 |
+| kubernetes | >= 2.0 |
+| local | >= 2.0 |
 
 ## Modules
 

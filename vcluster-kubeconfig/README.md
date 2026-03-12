@@ -47,8 +47,8 @@ The kubeconfig is also written to disk at `output_path` for use with external to
 
 | Name | Version |
 |------|---------|
-| http | 3.5.0 |
-| local | 2.7.0 |
+| http | >= 3.2 |
+| local | >= 2.0 |
 
 ## Modules
 

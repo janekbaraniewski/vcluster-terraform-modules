@@ -3,7 +3,7 @@
 # This is NOT a real usage example — it exists only for CI validation.
 
 terraform {
-  required_version = ">= 1.5"
+  required_version = ">= 1.6"
 
   required_providers {
     http = {

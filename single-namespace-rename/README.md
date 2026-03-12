@@ -35,14 +35,14 @@ output "updated_name" {
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.5 |
+| terraform | >= 1.6 |
 | http | >= 3.2 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| http.default | 3.5.0 |
+| http.default | >= 3.2 |
 
 ## Modules
 

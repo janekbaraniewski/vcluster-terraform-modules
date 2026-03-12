@@ -39,8 +39,8 @@ module "vcluster_registration" {
 
 | Name | Version |
 |------|---------|
-| http | 3.5.0 |
-| kubernetes | 3.0.1 |
+| http | >= 3.2 |
+| kubernetes | >= 2.0 |
 
 ## Modules
 
